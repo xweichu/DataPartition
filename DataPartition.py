@@ -72,7 +72,7 @@ def merge_read_ops(obj_ids, offsets, lengths):
 
 def row_workload_collayout(data_pool, percentage = 10):
     start = time.time()
-    rows = random.sample(range(1000000), 1000000*percentage/100)
+    rows = random.sample(range(1000000), int(1000000*percentage/100))
     cluster = rados.Rados(conffile='/etc/ceph/ceph.conf')
     cluster.connect()
     ioctx = cluster.open_ioctx(data_pool)
@@ -88,7 +88,7 @@ def row_workload_collayout(data_pool, percentage = 10):
 
 def col_workload_collayout(data_pool, percentage = 10):
     start = time.time()
-    cols = random.sample(range(1000), 1000*percentage/100)
+    cols = random.sample(range(1000), int(1000*percentage/100))
     cluster = rados.Rados(conffile='/etc/ceph/ceph.conf')
     cluster.connect()
     ioctx = cluster.open_ioctx(data_pool)
@@ -187,9 +187,9 @@ def col_worload_rowlayout(data_pool, percentage = 10):
     return (stop - start)
             
 # one time efferts. 1000*1000*8 bytes which is about 8MB objects
-inject_data([1000,1000], 'datapool2')           
+# inject_data([1000,1000], 'datapool2')           
 
-# total table size is 8000MB, 1% is 80MB
+# total table size is 8000MB, 1% is 80MB 
 secs = row_worload_rowlayout('datapool2', 1)
 print('row worload row laytout:' + str(secs))
 time.sleep(15)
