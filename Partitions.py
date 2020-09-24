@@ -221,29 +221,38 @@ def col_workload_rowlayout(partition_shape, data_pool, percentage = 10):
 
 
 percentage = 1
-partition_shape = [8000,125]
-print('Partition Shape ' + str(partition_shape) + ' (' + str(partition_shape[0]) + ' rows and '+ str(partition_shape[1])+' cols per object)')
-print('Data selection percentatage(%):' + str(percentage))
+datapool = 'datapool2'
+partition_shapes = [[1000,1000], [2000,500],[4000,250], [5000,200], [8000,125], [10000,100], [20000, 50], [40000, 25],[50000, 20], [100000, 10], [200000, 5], [1000000, 1]]
+row_row = []
+row_col = []
+col_row = []
+col_col = []
 
-secs = row_workload_rowlayout(partition_shape , 'datapool2', percentage)
-bandwidth = 1000000000 * 8 * percentage / 100 / secs / 1024
-print('Row workload for partitions in row layout bandwidth(KB/s):' + str(bandwidth))
-time.sleep(15)
+data_file = open('results','a')
 
+for partition_shape in partition_shapes:
+    secs = row_workload_rowlayout(partition_shape , datapool, percentage)
+    bandwidth = 1000000000 * 8 * percentage / 100 / secs / 1024
+    row_row.append(bandwidth)
+    data_file.write(str(bandwidth)+',')
+    data_file.flush()
 
-secs = row_workload_collayout(partition_shape , 'datapool2', percentage)
-bandwidth = 1000000000 * 8 * percentage / 100 / secs / 1024
-print('Row workload for partitions in col layout bandwidth(KB/s):' + str(bandwidth))
-time.sleep(15)
+    secs = row_workload_collayout(partition_shape , datapool, percentage)
+    bandwidth = 1000000000 * 8 * percentage / 100 / secs / 1024
+    row_col.append(bandwidth)
+    data_file.write(str(bandwidth)+',')
+    data_file.flush()
 
+    secs = col_workload_rowlayout(partition_shape , datapool, percentage)
+    bandwidth = 1000000000 * 8 * percentage / 100 / secs / 1024
+    col_row.append(bandwidth)
+    data_file.write(str(bandwidth)+',')
+    data_file.flush()
 
-secs = col_workload_rowlayout(partition_shape , 'datapool2', percentage)
-bandwidth = 1000000000 * 8 * percentage / 100 / secs / 1024
-print('Col workload for partitions in row layout bandwidth(KB/s):' + str(bandwidth))
-time.sleep(15)
+    secs = col_workload_collayout(partition_shape , datapool, percentage)
+    bandwidth = 1000000000 * 8 * percentage / 100 / secs / 1024
+    col_col.append(bandwidth)
+    data_file.write(str(bandwidth)+'\n')
+    data_file.flush()
 
-
-bandwidth = 1000000000 * 8 * percentage / 100 / secs
-secs = col_workload_collayout(partition_shape , 'datapool2', percentage)
-bandwidth = 1000000000 * 8 * percentage / 100 / secs / 1024
-print('Col workload for partitions in col layout bandwidth(KB/s):' + str(bandwidth))
+data_file.close()
