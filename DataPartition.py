@@ -6,16 +6,21 @@ import sys
 import time
 
 
-# convert the df to byte stream
+# convert the df to byte stream  
 def df_to_bytes(df):
-    bts = bytes(0)
+    row_bts = bytes(0)
+    col_bts = bytes(0)
+
     rows = df.shape[0]
     cols = df.shape[1]
 
+    for i in range(rows):
+        row_bts = row_bts + df[0][i].tobytes()
+
     for i in range(cols):
-        for j in range(rows):
-            bts = bts + df[i][j].tobytes()
-    return bts
+        col_bts = col_bts + row_bts
+
+    return col_bts
 
 
 # get the df given the shape
@@ -35,7 +40,7 @@ def inject_data(partition_shape, data_pool):
     cluster = rados.Rados(conffile='/etc/ceph/ceph.conf')
     cluster.connect()
     ioctx = cluster.open_ioctx(data_pool)
-    for i in range(int(1000/partition_shape[1]+1) * int(1000000/partition_shape[0] + 1)):
+    for i in range(int(1000/partition_shape[1]) * int(1000000/partition_shape[0])):
         comp = ioctx.aio_write_full(str(i),bts,oncomplete=_complete)
     comp.wait_for_complete()
     time.sleep(30)
@@ -187,7 +192,7 @@ def col_worload_rowlayout(data_pool, percentage = 10):
     return (stop - start)
             
 # one time efferts. 1000*1000*8 bytes which is about 8MB objects
-# inject_data([1000,1000], 'datapool2')           
+inject_data([1000,1000], 'datapool2')           
 
 # total table size is 8000MB, 1% is 80MB 
 secs = row_worload_rowlayout('datapool2', 1)
